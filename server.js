@@ -1,61 +1,96 @@
-const { hash } = require('bcrypt');
+if(process.env.NODE_ENV != 'production'){
+    require('dotenv').config()
+}
+
+//const { hash } = require('bcrypt');
 const express = require('express')
 const app = express()
-app.use(express.json()) 
 const bcrypt = require('bcrypt') 
+const passport = require('passport')
+const flash = require('express-flash')
+const session = require('express-session')
+const initializePassport = require('./passport-config')
+const methodOverride = require('method-override')
+
+initializePassport(
+    passport, 
+    email =>  users.find(user => user.email === email),
+    id => users.find(user => user.id === id)
+)
 
 const users = []; //save in a database
-/*app.get('/', (req, res) => 
+app.set('view-engine', 'ejs')
+
+//app.use(express.json()) 
+app.use(express.urlencoded({ extended: false})) //take email and password from input and use them in post
+app.use(flash())
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false, 
+    saveUninitialized: false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(methodOverride('_method'))
+
+app.get('/', checkAuthenticated, (req, res) => 
 {
-    res.render('index.ejs')
-})*/
-app.get('/users', (req, res) =>
-{
-    res.json(users)
+    res.render('index.ejs', {name: req.user.name})
 })
 
-//create users and get request and response
-app.post('/users', async (req, res) =>
+app.get('/login', checkNotAuthenticated, (req, res) =>
 {
-    try 
-    {
-         
+    res.render('login.ejs')
+})
+
+app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+}))
+
+app.get('/register', checkNotAuthenticated, (req, res) =>{
+    res.render('register.ejs')
+})
+
+
+app.post('/register', checkNotAuthenticated, async (req, res) =>{
+    try{ 
         const hashedPassword = await bcrypt.hash(req.body.password, 10)  //auto generates a salt (10 rounds)
-        const user = {name: req.body.name, password: hashedPassword}
-        users.push(user)
-        res.status(201).send()
-    } catch
-    {
-        res.status(500).send()
-    }  
+        users.push({
+            id: Date.now().toString(),   //if had database, don't worry about this step
+            name: req.body.name,
+            email: req.body.email,
+            password: hashedPassword
+        })
+        res.redirect('/login')  //if successfull, redirect to login page
+    } catch{
+        res.redirect('/register')   //if failed, stay on register page
+    } 
 })
 
-app.post('/users/login', async (req, res) =>
-{
-    //matching up the name sent in to name in database
-    const user = users.find(user => user.name = req.body.name)
-    if(user == null)
-    {
-        return res.status(400).send('Cannot find the username')
-    }
-    //compare input to password of user
-    try
-    {
-                        //name pass         user input
-        if(await bcrypt.compare(req.body.password, user.password))
-        {
-            //password is the same
-            res.send('Success')
-        }
-        else
-        {
-            res.send('Not allowed')
-        }
-    }catch
-    {
-        res.status(500).send()
-    }
+app.delete('/logout', (req, res) => {
+    req.logOut()
+    res.redirect('/login')
+}) 
 
-})
+//if user is already authenticated, return true, go to next 
+function checkAuthenticated(req, res, next){
+    if(req.isAuthenticated()) {
+        return next()
+    }
+    res.redirect('/login')
+}
+
+//if user is not authenticated, do not allow past homepage
+function checkNotAuthenticated(req, res, next){
+    if(req.isAuthenticated()) {
+        //If authenticated, go to homepage
+        return res.redirect('/')
+    }
+    next()
+}
+
 
 app.listen(3000)
+
