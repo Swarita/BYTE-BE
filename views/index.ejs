@@ -1,0 +1,84 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    .topnav {
+      overflow: hidden;
+      background-color: black;
+    }
+    
+    .topnav a {
+      float: right;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 20px 20px;
+      text-decoration: none;
+      font-size: 17px;
+    }
+    
+    .topnav a:hover {
+      background-color: #7D57A2;
+      color: black;
+    }
+    
+    .topnav a.active {
+      background-color: #522B67;
+      color: white;
+    }
+    </style>
+    </head>
+    <body>
+    
+    <div class="topnav">
+      <img src="headerLogo.jpg" alt="Header Logo" width="150" height="55" class="headerlogo">
+      <a href="#profile.html">My Profile</a>
+      <a href="#code.html">Q & A</a>
+      <a href="#marketing.html">Marketing</a>
+      <a href="#capitalGain.html">Capital Gain</a>
+      <a class="active" href="#home.html">Home</a>
+    </div>
+    
+    </body>
+    button and text code
+    <style>
+                .b
+                {
+                position: absolute;
+                top: 475px;
+                left: 840px;
+                width: 150px;
+                height: 50px;
+                background-color: #36225D;
+                }
+                
+                .headerlogo {
+                position: absolute;
+                    z-index: 88888;
+                top: 55px;
+                left: 0px;
+                }
+
+                .apply
+                {
+                    position: absolute;
+                    top: 493px;
+                    left: 860px;
+                    width: 130px;
+                    height: 50px;
+                }
+        </style>
+    <body>
+        <div class="b"></div>
+        <div class="apply">
+            <b style="color:white; font-size: 16px; "> Make A Profile </b>
+        </div>
+        </body>
+
+<h1>Hi <%= name %></h1>
+<form action = "/logout?_method=DELETE" method="POST">
+    <button type="submit"> Log Out</button>
+</form>
